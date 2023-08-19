@@ -27,9 +27,9 @@ app.get('/', async (req, res) => {
       })
     .then((result) => {
         console.log(JSON.stringify(result[0].candidates[0].output));
-        res.send(JSON.stringify(result[0].candidates[0].output));});
+        res.send(`{response : "${JSON.stringify(result[0].candidates[0].output)}"}`);
 })
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);
-})
+})});
