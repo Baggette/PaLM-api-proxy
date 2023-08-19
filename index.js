@@ -26,8 +26,8 @@ app.get('/', async (req, res) => {
         },
       })
     .then((result) => {
-        console.log(JSON.stringify(result));
-        res.send(JSON.stringify(result));});
+        console.log(JSON.stringify(result[0].candidates[0].output));
+        res.send(JSON.stringify(result[0].candidates[0].output));});
 })
 
 app.listen(process.env.PORT, () => {
