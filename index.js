@@ -30,6 +30,7 @@ app.get("/", async (req, res) => {
         console.log(JSON.stringify(result));
         res.send(req.query.full ? `{"response" : ${JSON.stringify(result)}}` : `{"response" : ${JSON.stringify(result[0].candidates[0].output) || "Sorry I don't feel comfortable answering that question."}}`);
     } else {
+        try {
         const genAI = new GoogleGenerativeAI(API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -38,6 +39,9 @@ app.get("/", async (req, res) => {
 
         console.log(text);
         res.send(`{"response" : ${text || "Sorry I don't feel comfortable answering that question."}}`);
+        } catch(err) {
+            res.send(`{"error" : ${err}}`);
+        }
     }
 });
 
