@@ -31,14 +31,14 @@ app.get("/", async (req, res) => {
         res.send(req.query.full ? `{"response" : ${JSON.stringify(result)}}` : `{"response" : ${JSON.stringify(result[0].candidates[0].output) || "Sorry I don't feel comfortable answering that question."}}`);
     } else {
         try {
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            const genAI = new GoogleGenerativeAI(API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-        const result = await model.generateContent(PROMPT).response;
-        const text = result.text();
+            const result = await model.generateContent(PROMPT).response;
+            const text = await result.text();
 
-        console.log(text);
-        res.send(`{"response" : ${text || "Sorry I don't feel comfortable answering that question."}}`);
+            console.log(text);
+            res.send(`{"response" : ${text || "Sorry I don't feel comfortable answering that question."}}`);
         } catch(err) {
             res.send(`{"error" : ${err}}`);
         }
