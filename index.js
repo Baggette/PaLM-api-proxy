@@ -34,13 +34,14 @@ app.get("/", async (req, res) => {
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-            const result = await model.generateContent(PROMPT).response;
-            const text = await result.text();
+            const result = await model.generateContent(PROMPT);
+            const response = await result.response;
+            const text = response.text();
 
             console.log(text);
             res.send(`{"response" : ${text || "Sorry I don't feel comfortable answering that question."}}`);
         } catch(err) {
-            res.send(`{"error" : ${err}}`);
+            res.send(`{"error" : ${err.stack}}`);
         }
     }
 });
