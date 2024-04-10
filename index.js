@@ -13,24 +13,23 @@ app.get("/", async (req, res) => {
     const PALM_MODEL_NAME = "models/text-bison-001";
     const API_KEY = req.query.api_key;
     const PROMPT = `${req.query.prompt}`;
+    try {
+        if (!req.query.gemini) {
 
-    if (!req.query.gemini) {
+            const client = new TextServiceClient({
+                authClient: new GoogleAuth().fromAPIKey(API_KEY),
+            });
 
-        const client = new TextServiceClient({
-            authClient: new GoogleAuth().fromAPIKey(API_KEY),
-        });
+            const result = await client.generateText({
+                model: PALM_MODEL_NAME,
+                prompt: {
+                    text: PROMPT,
+                },
+            });
 
-        const result = await client.generateText({
-            model: PALM_MODEL_NAME,
-            prompt: {
-                text: PROMPT,
-            },
-        });
-
-        console.log(JSON.stringify(result));
-        res.send(req.query.full ? `{"response" : ${JSON.stringify(result)}}` : `{"response" : ${JSON.stringify(result[0].candidates[0].output) || "Sorry I don't feel comfortable answering that question."}}`);
-    } else {
-        try {
+            console.log(JSON.stringify(result));
+            res.send(req.query.full ? `{"response" : ${JSON.stringify(result)}}` : `{"response" : ${JSON.stringify(result[0].candidates[0].output) || "Sorry I don't feel comfortable answering that question."}}`);
+        } else {
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -40,9 +39,9 @@ app.get("/", async (req, res) => {
 
             console.log(text);
             res.send(`{"response" : ${text || "Sorry I don't feel comfortable answering that question."}}`);
-        } catch(err) {
-            res.send(`{"error" : ${err.stack}}`);
         }
+    } catch (err) {
+        res.send(err.stack);
     }
 });
 
