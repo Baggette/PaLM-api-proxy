@@ -15,7 +15,6 @@ app.get("/", async (req, res) => {
     const PROMPT = `${req.query.prompt}`;
     try {
         if (!req.query.gemini) {
-
             const client = new TextServiceClient({
                 authClient: new GoogleAuth().fromAPIKey(API_KEY),
             });
@@ -27,24 +26,22 @@ app.get("/", async (req, res) => {
                 },
             });
 
-            console.log(JSON.stringify(result));
-            res.send(req.query.full ? `{"response" : ${JSON.stringify(result)}}` : `{"response" : ${JSON.stringify(result[0].candidates[0].output) || "Sorry I don't feel comfortable answering that question."}}`);
+            const response = req.query.full ? JSON.stringify(result) : JSON.stringify(result[0]?.candidates[0]?.output || "Sorry I don't feel comfortable answering that question.");
+            res.json({ response });
         } else {
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
             const result = await model.generateContent(PROMPT);
-            const response = await result.response;
-            const text = response.text();
-
-            console.log(text);
-            res.send(`{"response" : ${text || "Sorry I don't feel comfortable answering that question."}}`);
+            const response = (await result.response)?.text() || "Sorry I don't feel comfortable answering that question.";
+            res.json({ response });
         }
     } catch (err) {
-        res.send(err.stack);
+        res.status(500).json({ error: err.stack });
     }
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server is listening on port ${process.env.PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
 });
