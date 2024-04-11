@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 
 const { TextServiceClient } = require("@google-ai/generativelanguage").v1beta2;
 const { GoogleAuth } = require("google-auth-library");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
 dotenv.config();
 const app = express();
@@ -29,8 +29,29 @@ app.get("/", async (req, res) => {
             const response = req.query.full ? JSON.stringify(result) : JSON.stringify(result[0]?.candidates[0]?.output || "Sorry I don't feel comfortable answering that question.");
             res.json({ response });
         } else {
+
+            const safetySettings = [
+                {
+                    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                }, {
+                    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                }, {
+                    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                }, {
+                    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                }, {
+                    category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+                    threshold: HarmBlockThreshold.BLOCK_NONE,
+                },
+            ];
+
+              
             const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            const model = genAI.getGenerativeModel({ model: "gemini-pro", safetySettings });
 
             const result = await model.generateContent(PROMPT);
             const response = (await result.response)?.text() || "Sorry I don't feel comfortable answering that question.";
