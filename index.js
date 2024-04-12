@@ -7,14 +7,17 @@ const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@googl
 
 dotenv.config();
 const app = express();
+app.use(express.json()); // Parse JSON bodies
 
-app.get("/", async (req, res) => {
-    if (req.query.api_key == null || req.query.prompt == null) return res.send("Please provide an API key and prompt");
+app.post("/", async (req, res) => {
+    if (req.body.api_key == null || req.body.prompt == null) return res.status(400).json({ error: "Please provide an API key and prompt" });
+
     const PALM_MODEL_NAME = "models/text-bison-001";
-    const API_KEY = req.query.api_key;
-    const PROMPT = `${req.query.prompt}`;
+    const API_KEY = req.body.api_key;
+    const PROMPT = `${req.body.prompt}`;
+
     try {
-        if (!req.query.gemini) {
+        if (!req.body.gemini) {
             const client = new TextServiceClient({
                 authClient: new GoogleAuth().fromAPIKey(API_KEY),
             });
@@ -26,10 +29,9 @@ app.get("/", async (req, res) => {
                 },
             });
 
-            const response = req.query.full ? JSON.stringify(result) : JSON.stringify(result[0]?.candidates[0]?.output || "Sorry I don't feel comfortable answering that question.");
+            const response = req.body.full ? JSON.stringify(result) : JSON.stringify(result[0]?.candidates[0]?.output || "Sorry I don't feel comfortable answering that question.");
             res.json({ response });
         } else {
-
             const safetySettings = [
                 {
                     category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
@@ -46,7 +48,6 @@ app.get("/", async (req, res) => {
                 },
             ];
 
-              
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-pro", safetySettings });
 
